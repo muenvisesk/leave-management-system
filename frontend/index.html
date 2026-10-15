@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ระบบจัดการการลา | Login</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="login-page">
+  <main class="login-shell" id="loginShell">
+    <section class="login-scene" aria-hidden="true">
+      <div class="scene-topline">
+        <img class="scene-mark" src="logo.svg" alt="">
+        <span>PEOPLE OPERATIONS <i>/</i> 01</span>
+      </div>
+      <div class="scene-copy">
+        <p class="scene-eyebrow">LEAVE MANAGEMENT SYSTEM</p>
+        <p class="scene-wordmark">LEAVE</p>
+        <p class="scene-title">ระบบจัดการ<br><strong>การลา</strong></p>
+        <span class="scene-caption">EMPLOYEE PORTAL</span>
+      </div>
+      <svg class="scene-visual" viewBox="0 0 760 620" preserveAspectRatio="none" aria-hidden="true">
+        <defs>
+          <linearGradient id="railGold" x1="0%" y1="100%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#aa8058" stop-opacity=".16" />
+            <stop offset="48%" stop-color="#ddc19a" stop-opacity=".9" />
+            <stop offset="100%" stop-color="#f4e8d5" stop-opacity=".3" />
+          </linearGradient>
+          <linearGradient id="railHot" x1="0%" y1="100%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#806044" stop-opacity=".1" />
+            <stop offset="60%" stop-color="#c5a47c" stop-opacity=".85" />
+            <stop offset="100%" stop-color="#ead8bf" stop-opacity=".2" />
+          </linearGradient>
+        </defs>
+        <g class="scene-rails">
+          <path class="scene-rail scene-rail--wide" d="M-50 635 162 458 242 392 320 338 411 309 494 266 785-14" />
+          <path class="scene-rail" d="M-60 604 150 431 229 367 307 313 398 284 481 241 772-39" />
+          <path class="scene-rail" d="M-35 667 177 489 257 423 335 369 426 340 509 297 800 17" />
+          <path class="scene-rail" d="M-8 572 133 445 209 386 288 334 379 304 464 261 753-18" />
+          <path class="scene-rail" d="M20 617 173 474 248 411 326 359 418 329 503 284 773 35" />
+          <path class="scene-rail scene-rail--hot" d="M-43 532 127 410 199 356 280 310 366 281 457 239 721-14" />
+          <path class="scene-rail scene-rail--hot" d="M38 686 209 514 278 447 355 392 449 359 533 316 809 54" />
+          <path class="scene-cut" d="M-18 214 130 318 183 351M392 620 497 510 568 453 641 404 757 301" />
+        </g>
+      </svg>
+      <div class="scene-footer">
+        <span>WORKSPACE ACCESS</span>
+        <span>01 <i>/</i> 04</span>
+      </div>
+    </section>
+
+    <section class="login-card">
+      <div class="logo-box"><img src="logo.svg" alt="Leave Management System"></div>
+      <p class="login-overline">WELCOME BACK</p>
+      <h1>เข้าสู่ระบบ</h1>
+      <p class="subtitle">ระบบจัดการการลา</p>
+
+      <form id="loginForm">
+        <label for="employeeCode">รหัสพนักงาน (Employee ID)</label>
+        <input id="employeeCode" placeholder="กรอกรหัสพนักงาน" autocomplete="username" required>
+
+        <label for="password">Password</label>
+        <input id="password" type="password" placeholder="กรอก Password" autocomplete="current-password" required>
+
+        <button class="primary-btn" type="submit">เข้าสู่ระบบ</button>
+        <p id="loginError" class="error-text"></p>
+      </form>
+
+      <section class="demo-accounts" aria-label="บัญชีทดสอบ">
+        <h2>บัญชีทดสอบ</h2>
+        <div class="demo-account-grid">
+          <span>พนักงาน: EMP001 / 1234</span>
+          <span>หัวหน้างาน: EMP006 / 1234</span>
+          <span>หัวหน้าแผนก: EMP007 / 1234</span>
+          <span>HR: EMP008 / 1234</span>
+        </div>
+      </section>
+
+    </section>
+  </main>
+
+  <script>
+    document.getElementById("loginForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const error = document.getElementById("loginError");
+      error.textContent = "";
+
+      try {
+        const res = await fetch("/api/login", {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify({
+            employeeCode: document.getElementById("employeeCode").value.trim(),
+            password: document.getElementById("password").value
+          })
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message || "เข้าสู่ระบบไม่สำเร็จ");
+
+        localStorage.setItem("user", JSON.stringify(data.user));
+        window.location.href = "dashboard.html";
+      } catch (err) {
+        error.textContent = err.message;
+      }
+    });
+
+    const loginShell = document.getElementById("loginShell");
+    loginShell.addEventListener("pointermove", (event) => {
+      if (event.pointerType === "touch") return;
+      const bounds = loginShell.getBoundingClientRect();
+      const horizontal = (event.clientX - bounds.left) / bounds.width - 0.5;
+      const vertical = (event.clientY - bounds.top) / bounds.height - 0.5;
+      const sceneBounds = loginShell.querySelector(".login-scene").getBoundingClientRect();
+      const pointerX = Math.min(100, Math.max(0, ((event.clientX - sceneBounds.left) / sceneBounds.width) * 100));
+      const pointerY = Math.min(100, Math.max(0, ((event.clientY - sceneBounds.top) / sceneBounds.height) * 100));
+      loginShell.style.setProperty("--pointer-x", `${pointerX}%`);
+      loginShell.style.setProperty("--pointer-y", `${pointerY}%`);
+      loginShell.style.setProperty("--scene-x", `${horizontal * -24}px`);
+      loginShell.style.setProperty("--scene-y", `${vertical * -20}px`);
+      loginShell.style.setProperty("--card-x", `${horizontal * -5}px`);
+      loginShell.style.setProperty("--card-y", `${vertical * -4}px`);
+      loginShell.style.setProperty("--tilt-x", `${horizontal * -1.4}deg`);
+      loginShell.style.setProperty("--tilt-y", `${vertical * 1.2}deg`);
+    });
+
+    loginShell.addEventListener("pointerleave", () => {
+      const resetValues = {
+        "--scene-x": "0px",
+        "--scene-y": "0px",
+        "--pointer-x": "50%",
+        "--pointer-y": "50%",
+        "--card-x": "0px",
+        "--card-y": "0px",
+        "--tilt-x": "0deg",
+        "--tilt-y": "0deg"
+      };
+      Object.entries(resetValues).forEach(([property, value]) => {
+        loginShell.style.setProperty(property, value);
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ระบบจัดการการลา</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-logo"><img src="logo.svg" alt=""></div>
+      <div><div class="brand-title">Leave System</div><div class="brand-sub">Leave Management System</div></div>
+    </div>
+    <div class="user-mini">
+      <div class="avatar" id="miniAvatar">U</div>
+      <div><strong id="miniName">ผู้ใช้งาน</strong><small id="miniRole">EMPLOYEE</small></div>
+    </div>
+    <nav class="nav" id="nav"></nav>
+    <div class="sidebar-bottom"><button class="logout" id="logoutBtn">🚪 <span>ออกจากระบบ</span></button></div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div><div class="page-title" id="topTitle">หน้าหลัก</div><div class="page-sub">ระบบจัดการการลา</div></div>
+      <div class="top-actions">
+        <button class="icon-btn" id="notificationButton" onclick="showPage('notifications')">🔔<span class="badge" id="unreadBadge">0</span></button>
+        <button class="btn btn-gray" onclick="showPage('profile')" id="topUser">ผู้ใช้งาน</button>
+      </div>
+    </header>
+
+    <section class="content">
+      <div id="dashboardPage" class="page active">
+        <div class="welcome"><h2 id="welcomeText">สวัสดี</h2><p>ยินดีต้อนรับเข้าสู่ระบบจัดการการลา</p></div>
+        <div class="stats" id="stats"></div>
+        <div class="grid-2">
+          <div class="card"><h3 class="card-title">รายการลาล่าสุด</h3><div id="recentTable"></div></div>
+          <div class="card"><h3 class="card-title">เมนูด่วน</h3><div class="quick" id="quickMenu"></div></div>
+        </div>
+      </div>
+
+      <div id="leavePage" class="page">
+        <div class="toolbar"><div><h2 class="page-title">ใบลาของฉัน</h2><p class="page-sub">รายการใบลาทั้งหมดของคุณ</p></div><button class="btn btn-blue" onclick="openLeaveModal()">＋ ยื่นใบลา</button></div>
+        <div class="card"><div id="leaveTable"></div></div>
+      </div>
+
+      <div id="balancePage" class="page">
+        <div class="toolbar"><div><h2 class="page-title">วันลาคงเหลือ</h2><p class="page-sub">ตรวจสอบสิทธิ์การลาประจำปี</p></div></div>
+        <div class="card"><div id="balanceTable"></div></div>
+      </div>
+
+      <div id="approvalPage" class="page">
+        <div class="toolbar"><div><h2 class="page-title">รายการรออนุมัติ</h2><p class="page-sub">ตรวจสอบและดำเนินการใบลา</p></div></div>
+        <div class="card"><div id="approvalTable"></div></div>
+      </div>
+
+      <div id="notificationsPage" class="page">
+        <div class="toolbar"><div><h2 class="page-title">การแจ้งเตือน</h2><p class="page-sub">ข่าวสารและสถานะใบลา</p></div><button class="btn btn-gray" onclick="markAllRead()">อ่านทั้งหมด</button></div>
+        <div class="card" id="notificationList"></div>
+      </div>
+
+      <div id="statusPage" class="page">
+        <div class="toolbar">
+          <div><h2 class="page-title">ติดตามสถานะการลา</h2><p class="page-sub">ตรวจสอบขั้นตอนการอนุมัติใบลาของคุณ</p></div>
+        </div>
+        <div id="statusLoading" class="notice">กำลังโหลดข้อมูล...</div>
+        <div id="statusEmpty" class="notice" style="display:none">ยังไม่มีรายการลา</div>
+        <div id="statusList" class="status-list"></div>
+      </div>
+
+      <div id="historyPage" class="page">
+        <div class="toolbar"><div><h2 class="page-title">ประวัติการลา</h2><p class="page-sub">ดูประวัติการลาทั้งหมด</p></div></div>
+        <div class="card"><div id="historyTable"></div></div>
+      </div>
+
+      <div id="hrPage" class="page">
+        <div class="toolbar"><div><h2 class="page-title">HR Dashboard</h2><p class="page-sub">ภาพรวมระบบการลาและประสิทธิภาพแผนก</p></div></div>
+        <div class="stats" id="hrStats"></div>
+
+        <div class="hr-filter-bar">
+          <div class="filter-group">
+            <label>พนักงาน</label>
+            <select id="hrEmployeeFilter" class="form-control">
+              <option value="ALL">ทั้งหมด</option>
+            </select>
+          </div>
+          <div class="filter-actions">
+            <button class="btn btn-blue" id="hrExportCsvBtn">Export CSV</button>
+            <button class="btn btn-gray" id="hrExportExcelBtn">Export Excel (.xlsx)</button>
+          </div>
+        </div>
+
+        <div class="hr-layout">
+          <div class="card">
+            <h3 class="card-title">ภาพรวม HR</h3>
+            <div id="hrSummaryPanel" class="hr-summary-panel"></div>
+          </div>
+          <div class="card">
+            <h3 class="card-title">สรุปตามสถานะ</h3>
+            <div id="hrStatusBreakdown" class="status-breakdown"></div>
+          </div>
+        </div>
+
+        <div class="hr-layout">
+          <div class="card">
+            <h3 class="card-title">4.1 ตรวจสอบข้อมูลการลา</h3>
+            <div id="hrAuditPanel" class="hr-audit-panel"></div>
+          </div>
+          <div class="card">
+            <h3 class="card-title">4.2 รายงานและ Dashboard</h3>
+            <div id="hrReportPanel" class="hr-report-panel"></div>
+          </div>
+        </div>
+
+        <div class="card hr-anomaly-card">
+          <h3 class="card-title">รายการลาเกินเงื่อนไข / ผิดปกติ</h3>
+          <div class="hr-anomaly-note">ใช้แจ้งเตือนเพื่อตรวจสอบ ไม่ได้ปฏิเสธใบลาอัตโนมัติ</div>
+          <div id="hrAnomalyList" class="hr-anomaly-list"></div>
+        </div>
+
+        <div class="card chart-card">
+          <h3 class="card-title">แผนภูมิการลาแยกตามประเภท</h3>
+          <canvas id="hrLeaveChart" height="220"></canvas>
+        </div>
+
+        <div class="card">
+          <div class="toolbar">
+            <h3 class="card-title">วันลาคงเหลือรายพนักงาน</h3>
+            <button class="btn btn-gray" id="hrBalanceExportBtn">Export CSV</button>
+          </div>
+          <div id="hrBalanceTable"></div>
+        </div>
+
+        <div class="card"><h3 class="card-title">รายการใบลาทั้งระบบ</h3><div id="hrTable"></div></div>
+      </div>
+
+      <div id="profilePage" class="page">
+        <div class="toolbar"><div><h2 class="page-title">โปรไฟล์</h2><p class="page-sub">ข้อมูลผู้ใช้งานและรูปโปรไฟล์</p></div></div>
+        <div class="profile-wrap">
+          <div class="card center">
+            <div class="profile-avatar" id="profileAvatar">U</div>
+            <h3 id="profileName">ผู้ใช้งาน</h3>
+            <span class="role-chip" id="profileRole">EMPLOYEE</span>
+          </div>
+          <div class="card">
+            <h3 class="card-title">รูปโปรไฟล์</h3>
+            <div class="notice">สามารถวาง URL รูปภาพ เช่น https://.../profile.jpg แล้วกดบันทึกได้</div>
+            <div class="form-group">
+              <label>Image URL</label>
+              <input class="form-control" id="imageUrl" placeholder="วาง URL รูปภาพที่นี่">
+            </div>
+            <div class="modal-actions"><button class="btn btn-blue" onclick="saveProfileImage()">บันทึกรูป</button><button class="btn btn-gray" onclick="removeProfileImage()">ลบรูป</button></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div class="modal" id="leaveModal">
+  <div class="modal-box">
+    <div class="modal-head"><h3>ยื่นใบลา</h3><button class="close" onclick="closeModal('leaveModal')">×</button></div>
+    <form id="leaveForm">
+      <div class="form-grid">
+        <div class="form-group"><label>ประเภทการลา</label><select class="form-control" id="leaveType" required></select></div>
+        <div class="form-group"><label>จำนวนวัน</label><input class="form-control" id="leaveDays" type="number" min="0.5" step="0.5" required></div>
+        <div class="form-group"><label>วันที่เริ่ม</label><input class="form-control" id="startDate" type="date" required></div>
+        <div class="form-group"><label>วันที่สิ้นสุด</label><input class="form-control" id="endDate" type="date" required></div>
+        <div class="form-group"><label>เวลาเริ่ม (ถ้ามี)</label><input class="form-control" id="startTime" type="time"></div>
+        <div class="form-group"><label>เวลาสิ้นสุด (ถ้ามี)</label><input class="form-control" id="endTime" type="time"></div>
+        <div class="form-group full"><label>เหตุผล</label><textarea class="form-control" id="reason" placeholder="ระบุเหตุผลการลา"></textarea></div>
+        <div class="form-group full">
+          <label>เอกสารแนบ (ถ้ามี)</label>
+          <div class="attachment-picker">
+            <button class="btn btn-blue attachment-add" id="attachmentAddButton" type="button" aria-label="เพิ่มเอกสารแนบ" aria-expanded="false" onclick="toggleAttachmentMenu()">+</button>
+            <div class="attachment-menu" id="attachmentMenu" hidden>
+              <button type="button" onclick="chooseAttachmentSource('photoInput')">เลือกรูปภาพ</button>
+              <button type="button" onclick="chooseAttachmentSource('fileInput')">เลือกไฟล์</button>
+              <button type="button" onclick="chooseAttachmentSource('cameraInput')">ถ่ายรูป</button>
+            </div>
+          </div>
+          <input id="photoInput" type="file" accept="image/*" multiple hidden>
+          <input id="fileInput" type="file" accept=".pdf,.doc,.docx,.xls,.xlsx" multiple hidden>
+          <input id="cameraInput" type="file" accept="image/*" capture="environment" hidden>
+          <div class="attachment-list" id="attachmentList" aria-live="polite"></div>
+        </div>
+      </div>
+      <div class="modal-actions"><button type="button" class="btn btn-gray" onclick="closeModal('leaveModal')">ยกเลิก</button><button class="btn btn-blue" type="submit">ส่งใบลา</button></div>
+    </form>
+  </div>
+</div>
+
+<div class="modal" id="documentsModal">
+  <div class="modal-box">
+    <div class="modal-head"><h3>เอกสารแนบใบลา</h3><button class="close" onclick="closeModal('documentsModal')">×</button></div>
+    <div class="document-list" id="approvalDocumentsList"></div>
+    <div class="modal-actions"><button type="button" class="btn btn-gray" onclick="closeModal('documentsModal')">ปิด</button></div>
+  </div>
+</div>
+
+<div class="modal" id="approvalDecisionModal">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h3 id="approvalDecisionTitle">ดำเนินการกับใบลา</h3>
+      <button type="button" class="close" aria-label="ปิด" onclick="closeModal('approvalDecisionModal')">×</button>
+    </div>
+    <form id="approvalDecisionForm">
+      <div class="form-group">
+        <label id="approvalCommentLabel" for="approvalComment">หมายเหตุ (ถ้ามี)</label>
+        <textarea class="form-control" id="approvalComment" maxlength="1000"></textarea>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-gray" onclick="closeModal('approvalDecisionModal')">ยกเลิก</button>
+        <button type="submit" class="btn btn-blue" id="approvalDecisionSubmit">ยืนยัน</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="modal" id="cancelLeaveModal">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h3>ยืนยันยกเลิกใบลา</h3>
+      <button type="button" class="close" aria-label="ปิด" onclick="closeModal('cancelLeaveModal')">×</button>
+    </div>
+    <form id="cancelLeaveForm">
+      <div class="notice">ใบลาที่ยังอยู่ระหว่างรออนุมัติเท่านั้นที่ยกเลิกได้</div>
+      <div class="form-group">
+        <label for="cancelLeaveReason">เหตุผลการยกเลิก</label>
+        <textarea class="form-control" id="cancelLeaveReason" maxlength="1000"></textarea>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-gray" onclick="closeModal('cancelLeaveModal')">กลับ</button>
+        <button type="submit" class="btn btn-red" id="cancelLeaveSubmit">ยืนยันยกเลิก</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
